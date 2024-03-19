@@ -303,7 +303,219 @@ test_dir = os.path.join(data_dir, 'test')
 
 
 
-# 8. Main Function(training pipeline):
+# # 8. Main Function(training pipeline):
+# def main():
+#     # initial transform
+#     transform = tsfm.Compose([
+#         tsfm.Resize((224, 224)),
+#         tsfm.ToTensor(),
+#     ])
+
+#     # initial dataset
+#     whole_set = Train_data(
+#         root_dir=train_dir,
+#         transform=transform
+#     )
+
+#     test_set = Pred_data(
+#         root_dir=test_dir,
+#         transform=transform
+#     )
+
+#     # split train valid and initial dataloader
+#     train_set_size = int(len(whole_set) * 0.8)
+#     valid_set_size = len(whole_set) - train_set_size
+#     train_set, valid_set = random_split(whole_set, [train_set_size, valid_set_size])
+
+#     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+#     valid_loader = DataLoader(valid_set, batch_size=batch_size)
+
+#     # initial model
+#     model = resnet_50(num_classes=12).cuda()
+
+#     # initial loss_function and optimizer
+#     criterion = nn.CrossEntropyLoss()
+#     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+#     # initial plot values
+#     train_loss, train_acc = [], []
+#     valid_loss, valid_acc = [], []
+#     epoch_list = []
+
+#     # repeat train and valid epochs times
+#     print(epochs)
+#     for epoch in range(epochs):
+#       epoch_list.append(epoch + 1)
+
+#       loss, acc = train(
+#           model,
+#           criterion,
+#           optimizer,
+#           train_loader,
+#           epoch=epoch,
+#           total_epochs=epochs,
+#           batch_size=batch_size
+#       )
+#       train_loss.append(loss)
+#       train_acc.append(acc)
+#       print(f'Avg train Loss: {loss}, Avg train acc: {acc}')
+
+#       loss, acc = valid(
+#           model,
+#           criterion,
+#           valid_loader,
+#           epoch=epoch,
+#           total_epochs=epochs,
+#           batch_size=batch_size
+#       )
+#       valid_loss.append(loss)
+#       valid_acc.append(acc)
+#       print(f'Avg valid Loss: {loss}, Avg valid acc: {acc}')
+
+#     Plot("Loss Curve", 'Loss', epoch_list, train_loss, valid_loss)
+#     Plot("Accuarcy Curve", 'Acc', epoch_list, train_acc, valid_acc)
+
+#     preds = predict(test_set, model)
+#     view_pred_result(preds)
+
+# main()
+
+
+
+
+# 9. Addition: Customize your own model
+class VGG16(nn.Module):
+    def __init__(self, num_classes=12):
+        super(VGG16, self).__init__()
+        # input layer
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU()
+        )
+
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2)
+        )
+
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU()
+        )
+
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2)
+        )
+
+        self.layer5 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU())
+
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+
+        self.layer7 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2)
+        )
+
+        self.layer8 = nn.Sequential(
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+
+        self.layer9 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+
+        self.layer10 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2)
+        )
+
+        self.layer11 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+
+        self.layer12 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+
+        self.layer13 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2)
+        )
+
+        #  classifier
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(7*7*512, 4096),
+            nn.ReLU()
+        )
+
+        self.fc1 = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU()
+        )
+
+        self.fc2= nn.Sequential(
+            nn.Linear(4096, num_classes)
+        )
+
+    def forward(self, x):
+        out = self.layer1(x)
+        out = self.layer2(out)
+        out = self.layer3(out)
+        out = self.layer4(out)
+        out = self.layer5(out)
+        out = self.layer6(out)
+        out = self.layer7(out)
+        out = self.layer8(out)
+        out = self.layer9(out)
+        out = self.layer10(out)
+        out = self.layer11(out)
+        out = self.layer12(out)
+        out = self.layer13(out)
+        out = out.reshape(out.size(0), -1)
+        out = self.fc(out)
+        out = self.fc1(out)
+        out = self.fc2(out)
+        return out
+    
+
+
+# # Test model to debug
+# x = torch.rand(1, 3, 224, 224)
+# model = VGG16(num_classes=12)
+# y = model(x)
+# print(y)
+    
+
 def main():
     # initial transform
     transform = tsfm.Compose([
@@ -331,7 +543,7 @@ def main():
     valid_loader = DataLoader(valid_set, batch_size=batch_size)
 
     # initial model
-    model = resnet_50(num_classes=12).cuda()
+    model = VGG16(num_classes=12).cuda()
 
     # initial loss_function and optimizer
     criterion = nn.CrossEntropyLoss()
